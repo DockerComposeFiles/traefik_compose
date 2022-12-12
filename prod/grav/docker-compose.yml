@@ -1,0 +1,13 @@
+services:
+  grav:
+    image: lscr.io/linuxserver/grav
+    container_name: grav
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - /path/to/appdata/config:/config
+    ports:
+      - 80:80

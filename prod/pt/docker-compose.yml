@@ -1,0 +1,31 @@
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: pt
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - traefik
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data:/data
+    labels:
+      - traefik.enable=true                                                            # activate Traefik
+      # - traefik.docker.network=traefik                                               # general network
+      - traefik.http.routers.portainer.entrypoints=$ENTRYPOINT                        # 80 entrypoint as redirect
+      - traefik.http.routers.portainer-secure.entrypoints=$SECURE_ENTRYPOINT                        # 443 entrypoint
+      - traefik.http.routers.portainer-secure.service=portainer                        # service-name using by labels
+      - traefik.http.routers.portainer.rule=Host(`$URL`)                               # service-domain for 80
+      - traefik.http.routers.portainer-secure.rule=Host(`$URL`)                         # service-domain for 443
+      # - traefik.http.middlewares.portainer-https-redirect.redirectscheme.scheme=https # http->https middleware
+      # - traefik.http.routers.portainer.middlewares=portainer-https-redirect           # http->https middleware
+      - traefik.http.routers.portainer-secure.tls=true                                 # certificate=tls
+      - traefik.http.routers.portainer-secure.tls.certresolver=$CERTRESOLVER           # certresolver=lets-encrypt
+      - traefik.http.routers.portainer-secure.middlewares=secHeaders@file              # A++ security, provider:file
+      - traefik.http.services.portainer.loadbalancer.server.port=9000                  # default port
+
+networks:
+  traefik:
+    external: true

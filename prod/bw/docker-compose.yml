@@ -1,0 +1,28 @@
+services:
+  bitwarden:
+    image: vaultwarden/server
+    container_name: bw
+    restart: unless-stopped
+    volumes:
+      - ./data:/data
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.bitwarden.entrypoints=$ENTRYPOINT
+      - traefik.http.routers.bitwarden.rule=Host(`$BITWARDEN_URL`) # [] Domain
+      # - traefik.http.middlewares.bitwarden-https-redirect.redirectscheme.scheme=$SECURE_ENTRYPOINT # Weiterleitung output
+      # - traefik.http.routers.bitwarden.middlewares=bitwarden-https-redirect # Weiterleitung Mittelware
+      - traefik.http.routers.bitwarden-secure.middlewares=secHeaders@file # SSL A+
+      - traefik.http.routers.bitwarden-secure.tls=true
+      - traefik.http.routers.bitwarden.tls.certresolver=$CERTRESOLVER # [] Zert.Res.
+      - traefik.http.routers.bitwarden-secure.entrypoints=$SECURE_ENTRYPOINT # http Zertifizierung
+      - traefik.http.routers.bitwarden-secure.rule=Host(`$BITWARDEN_URL`) # [] Domain
+      - traefik.http.routers.bitwarden-secure.service=bitwarden
+      - traefik.http.services.bitwarden.loadbalancer.server.port=80
+    networks:
+      - traefik
+    environment:
+      - ADMIN_TOKEN=drool-traffic-custodian-stumble-ream8
+networks:
+  traefik:
+    external: true

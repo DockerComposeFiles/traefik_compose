@@ -1,0 +1,51 @@
+services:
+  traefik:
+    image: traefik:latest
+    container_name: tr  # Remove if using multiple instances
+    restart: unless-stopped
+    networks:
+      - traefik         # Change if you're using another network
+    command:
+      --providers.docker.exposedByDefault=false
+      # --log.level=DEBUG
+    labels:
+# Traefik configuration for the dashboard
+# Remove the labels section if the dashboard is disabled
+      - traefik.enable=true # false um Dashboard zu deaktivieren
+      - traefik.http.routers.traefik-https.rule=Host(`$URL`)                        # Hauptdomain
+      - traefik.http.routers.traefik-https.entrypoints=$SECURE_ENTRYPOINT                        # Dienste: Entrypoint vergabe
+      - traefik.http.routers.traefik-https.tls=true                                 # Dienste: Zertifikatsweitergabe
+      - traefik.http.routers.traefik-https.service=api@internal
+      # - traefik.http.routers.traefik-secure.middlewares=secHeaders@file             # File Absicherung
+    #  - traefik.http.routers.traefik.middlewares=auth@docker                         # normale Absicherung
+
+# Zertifikat feur dashboard
+      - traefik.http.routers.traefik-https.tls.certresolver=$CERTRESOLVER          #references our certificatesResolvers in traefik.yml
+
+# Authentication - Requires other generator
+#  - "traefik.http.routers.traefik-https.middlewares=auth"                          # SSL B Absicherung
+      # - traefik.http.middlewares.auth.basicauth.users="traefik:$apr1$Qtuvftxz$SlYBt8huCEde/sxv2GcNJ0"
+
+# Traefik Redirect to HTTPS
+# - "traefik.http.middlewares.redirect-https.redirectScheme.scheme=https"
+# - "traefik.http.middlewares.redirect-https.redirectScheme.permanent=true" 
+
+    ports:  # host/cont
+      - "80:80"
+      - "443:443"
+      - "2222:2222" # SSH Port
+    volumes:
+      # Einzelne Dateien eingebunden
+      - ./config/traefik.yml:/traefik.yml
+      - ./config/ACME:/ACME
+      - ./config/dynamic.yml:/dynamic.yml
+      # Zugriffe
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro                    # ro = Read only
+      - /etc/timezone:/etc/timezone:ro
+      - ./logs/:/var/logs
+
+
+networks:
+  traefik:
+    external: true

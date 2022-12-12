@@ -1,0 +1,33 @@
+services:
+  bookstack:
+    image: lscr.io/linuxserver/bookstack
+    container_name: bs_io
+    environment:
+      - PUID=1000 # dockeruser dockergroup
+      - PGID=1000
+      - APP_URL=$BOOKSTACK_URL
+      - DB_HOST=$BOOKSTACK_HOST
+      - DB_USER=$BOOKSTACK_USER
+      - DB_PASS=$BOOKSTACK_PW
+      - DB_DATABASE=$BOOKSTACK_DB # Muss Service entsprechen
+    volumes:
+      - ./app_config:/config
+    ports:
+      - 6875:80
+    restart: unless-stopped
+    depends_on:
+      - bookstack_db
+  bookstack_db:
+    image: lscr.io/linuxserver/mariadb
+    container_name: bs_io_db
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+      - MYSQL_DATABASE=$BOOKSTACK_DB
+      - MYSQL_USER=$BOOKSTACK_USER
+      - MYSQL_PASSWORD=$BOOKSTACK_PW
+      - MYSQL_ROOT_PASSWORD=$BOOKSTACK_PW
+    volumes:
+      - ./db_config:/config
+    restart: unless-stopped

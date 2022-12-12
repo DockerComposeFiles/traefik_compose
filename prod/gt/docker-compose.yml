@@ -1,0 +1,31 @@
+services:
+  gotify:
+    image: gotify/server
+    container_name: gt
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+      - /etc/timezone:/etc/timezone:ro
+      # ports:
+      # - "8080:80"
+    networks:
+      - traefik
+      # Traefik Router + Service Configuration
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.gotify-secure.entrypoints=$SECURE_ENTRYPOINT
+      - traefik.http.routers.gotify.rule=Host(`$GOTIFY_URL`)
+      - traefik.http.routers.gotify-secure.rule=Host(`$GOTIFY_URL`)
+      # && PathPrefix(`/gotify`)
+      - traefik.http.routers.gotify-secure.tls=true
+      - traefik.http.routers.gotify-secure.tls.certresolver=$CERTRESOLVER
+      - traefik.http.routers.gotify-secure.service=gotify
+      - traefik.http.services.gotify.loadbalancer.passhostheader=true
+      - traefik.http.services.gotify.loadbalancer.server.port=80
+      - traefik.http.services.gotify.loadbalancer.sticky=true
+      # - traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto = http
+      - traefik.http.routers.gotify.middlewares=secHeaders@file
+
+networks:
+  traefik:
+    external: true

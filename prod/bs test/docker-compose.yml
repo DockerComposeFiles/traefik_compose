@@ -1,0 +1,52 @@
+services:
+  bookstack-db:
+    image: mariadb
+    container_name: test-bs-db
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - ./database:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE=bookstack
+      - MYSQL_USER=$MYSQL_USER
+      - MYSQL_PASSWORD=$MYSQL_PASSWORD
+      - MYSQL_INITDB_SKIP_TZINFO=1
+
+  bookstack-app:
+    image: ghcr.io/linuxserver/bookstack
+    container_name: test-bs-app
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - ./app:/config
+    links:
+      - bookstack-db
+    environment:
+      - PUID=1000 # dockeruser dockergroup
+      - PGID=1000
+      - DB_HOST=bookstack-db:3306
+      - DB_DATABASE=bookstack
+      - DB_USERNAME=$MYSQL_USER
+      - DB_PASSWORD=$MYSQL_PASSWORD
+      - APP_URL=https://$BOOKSTACK_URL # Zeile auskommentieren, wenn kein Traefik verwendet wird!
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.bookstack_test.entrypoints=$SECURE_ENTRYPOINT
+      - traefik.http.routers.bookstack_test.rule=Host(`$BOOKSTACK_URL`)
+      - traefik.http.routers.bookstack_test-secure.rule=Host(`$BOOKSTACK_URL`)
+      - traefik.http.routers.bookstack_test.tls=true
+      - traefik.http.routers.bookstack_test-secure.service=$SERVICE
+      - traefik.http.routers.bookstack_test-secure.tls.certresolver=$CERTRESOLVER
+      - traefik.http.services.bookstack_test.loadbalancer.server.port=8293
+    ports:
+      - 6875:8293
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external: true

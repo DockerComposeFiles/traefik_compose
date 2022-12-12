@@ -1,0 +1,41 @@
+services:
+  bookstack_db:
+    image: mariadb:latest
+    container_name: bookstack_solid_db
+    restart: unless-stopped
+    networks:
+      - bs_solid
+    environment:
+      - MYSQL_ROOT_PASSWORD=$BOOKSTACK_PW
+      - MYSQL_DATABASE=$BOOKSTACK_DB
+      - MYSQL_USER=bookstack
+      - MYSQL_PASSWORD=$BOOKSTACK_PW
+      - MYSQL_INITDB_SKIP_TZINFO=1
+    volumes:
+      - ./data/db:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  app:
+    image: solidnerd/bookstack:latest
+    container_name: bookstack_solid
+    restart: unless-stopped
+    networks:
+      - bs_solid
+    depends_on:
+      - bookstack_db
+    environment:
+      - DB_HOST=bookstack_db
+      - DB_DATABASE=$BOOKSTACK_DB
+      - DB_USERNAME=bookstack
+      - DB_PASSWORD=$BOOKSTACK_PW
+      - APP_URL=$BOOKSTACK_URL
+    volumes:
+      - ./data/uploads:/var/www/bookstack/public/uploads
+      - ./data/storage-uploads:/var/www/bookstack/storage/uploads
+    ports: # host/cont
+      - "6875:80"
+
+networks:
+  bs_solid:
+    external: true

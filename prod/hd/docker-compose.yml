@@ -1,0 +1,29 @@
+services:
+  heimdall:
+    image: lscr.io/linuxserver/heimdall
+    container_name: hd
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    volumes:
+      - ./data:/config
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+
+      - traefik.http.routers.heimdall.rule=Host(`$HEIMDALL_URL`)
+      - traefik.http.routers.heimdall.entrypoints=$ENTRYPOINT
+
+      - traefik.http.routers.heimdall-secure.rule=Host(`$HEIMDALL_URL`)
+      - traefik.http.routers.heimdall-secure.entrypoints=$SECURE_ENTRYPOINT
+
+      - traefik.http.routers.heimdall-secure.tls=true
+      - traefik.http.routers.heimdall-secure.tls.certresolver=$CERTRESOLVER
+      - traefik.http.routers.heimdall-secure.middlewares=secHeaders@file
+    networks:
+      - traefik
+networks:
+  traefik:
+    external: true

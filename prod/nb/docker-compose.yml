@@ -1,0 +1,72 @@
+services:
+  caddy:
+    image: caddy
+    # https://hub.docker.com/_/caddy
+    volumes:
+      - static:/var/www/netbox/static
+      - media:/var/www/netbox/media
+      - caddy_data:/data
+      - ./netbox_caddyfile:/etc/caddy/Caddyfile
+    networks:
+      - caddy
+    ports:
+      # CHANGE TO "80:80" IF USING CADDY FOR HTTPS
+      - "9080:80"
+      # UNCOMMENT IF USING CADDY FOR HTTPS
+      # - "443:443"
+    environment:
+      # https://caddyserver.com/docs/automatic-https#overview
+      - DOMAIN=:80
+
+  netbox:
+    image: zeigren/netbox # ghcr.io/zeigren/netbox_docker:latest
+    # https://hub.docker.com/r/zeigren/netbox
+    # https://github.com/netbox-community/netbox
+    # https://netbox.readthedocs.io/en/stable/
+    volumes: # https://docs.docker.com/compose/compose-file/compose-file-v3/#volumes
+      - static:/usr/src/app/netbox/static
+      - media:/usr/src/media
+    networks: # https://docs.docker.com/compose/compose-file/compose-file-v3/#networks
+      - caddy
+      - netbox
+    environment: # https://docs.docker.com/compose/compose-file/compose-file-v3/#environment
+      - DATABASE_PASSWORD=CHANGEME
+      - ALLOWED_HOSTS=netbox.yourdomain.test
+      # CREATE SUPERUSER ONCE THEN DELETE THESE
+      # - CREATE_SUPERUSER=True
+      # - DJANGO_SUPERUSER_USERNAME=admin
+      # - DJANGO_SUPERUSER_EMAIL=admin@admin.com
+      # - DJANGO_SUPERUSER_PASSWORD=admin
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:alpine
+    # https://hub.docker.com/_/postgres
+    volumes:
+      - netbox_db:/var/lib/postgresql/data
+    secrets:
+      - netbox_db_password
+    networks:
+      - netbox
+    environment:
+      - POSTGRES_PASSWORD=CHANGEME
+      - POSTGRES_USER=netbox
+      - POSTGRES_DB=netbox
+
+  redis:
+    image: redis:alpine
+    # https://hub.docker.com/_/redis
+    networks:
+      - netbox
+
+volumes: # https://docs.docker.com/compose/compose-file/compose-file-v3/#volume-configuration-reference
+  static:
+  media:
+  caddy_data:
+  netbox_db:
+
+networks: # https://docs.docker.com/compose/compose-file/compose-file-v3/#network-configuration-reference
+  caddy:
+  netbox:

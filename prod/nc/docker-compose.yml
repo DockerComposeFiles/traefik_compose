@@ -1,0 +1,60 @@
+volumes:
+  nextcloud:
+  db:
+
+services:
+  db:
+    image: postgres
+    container_name: nc_db
+    restart: unless-stopped
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=$POSTGRES_DB
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      - TZ=Europe/Berlin
+    networks:
+      - traefik
+      - nc_backend
+    ports:
+      - "5432:5432"
+
+  app:
+    image: nextcloud
+    container_name: nc_app
+    restart: unless-stopped
+    links:
+      - db
+    volumes:
+      - ./data:/var/www/html
+    networks:
+      - traefik
+      - nc_backend
+    environment:
+      # - POSTGRES_HOST=nc_db:5432
+      - POSTGRES_HOST=nc_db
+      - POSTGRES_DB=$POSTGRES_DB
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      - TZ=Europe/Berlin
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.nextcloud.middlewares=nextcloud,nextcloud_redirect
+      - traefik.http.routers.nextcloud.tls=true
+      - traefik.http.routers.nextcloud.tls.certresolver=letsEncrypt
+      - traefik.http.routers.nextcloud.rule=Host(`$NEXTCLOUD_URL`)
+      - traefik.http.middlewares.nextcloud.headers.customFrameOptionsValue=ALLOW-FROM https://$NEXTCLOUD_URL/
+      - traefik.http.middlewares.nextcloud.headers.contentSecurityPolicy=frame-ancestors 'self' $NEXTCLOUD_URL *.$NEXTCLOUD_URL
+      - traefik.http.middlewares.nextcloud.headers.stsSeconds=155520011
+      - traefik.http.middlewares.nextcloud.headers.stsIncludeSubdomains=true
+      - traefik.http.middlewares.nextcloud.headers.stsPreload=true
+      - traefik.http.middlewares.nextcloud.headers.customresponseheaders.X-Frame-Options=SAMEORIGIN
+      - traefik.http.middlewares.nextcloud_redirect.redirectregex.permanent=true
+      - traefik.http.middlewares.nextcloud_redirect.redirectregex.regex=https://(.)/.well-known/(card|cal)dav
+      - traefik.http.middlewares.nextcloud_redirect.redirectregex.replacement=https://$${1}/remote.php/dav/
+
+networks:
+  traefik:
+    external: true
+  nc_backend:

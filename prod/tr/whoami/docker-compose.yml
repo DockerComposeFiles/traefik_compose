@@ -1,0 +1,11 @@
+services:
+
+  # As a Docker Label
+  whoami:
+    #  A container that exposes an API to show its IP address
+    image: traefik/whoami
+    labels:
+      # Create a middleware named `foo-ip-whitelist`
+      - "traefik.tcp.middlewares.foo-ip-whitelist.ipwhitelist.sourcerange=127.0.0.1/32, 192.168.1.7"
+      # Apply the middleware named `foo-ip-whitelist` to the router named `router1`
+      - "traefik.tcp.routers.router1.middlewares=foo-ip-whitelist@docker"

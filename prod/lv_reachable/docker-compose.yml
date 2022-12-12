@@ -1,0 +1,57 @@
+services:
+  reachable:
+    image: bitnami/laravel
+    container_name: lv_reachable
+    restart: unless-stopped
+    volumes:
+      - ./src:/app
+      # ports:
+      # - host:cont
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.reachable.rule=Host(`$LARAVEL_URL`)
+      - traefik.http.routers.reachable-secure.rule=Host(`$LARAVEL_URL`)
+      - traefik.http.routers.reachable.entrypoints=$ENTRYPOINT
+      - traefik.http.routers.reachable-secure.entrypoints=$SECURE_ENTRYPOINT
+
+      - traefik.http.routers.reachable-secure.service=reachable
+      - traefik.http.routers.reachable-secure.tls=true
+      - traefik.http.routers.reachable-secure.tls.certresolver=$CERTRESOLVER
+      - traefik.http.routers.reachable-secure.middlewares=secHeaders@file
+      - traefik.http.services.reachable.loadbalancer.server.port=8000
+    depends_on:
+      - mariadb
+    environment:
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_USERNAME=$MARIADB_USER
+      - DB_DATABASE=$MARIADB_DATABASE
+    networks:
+      - traefik
+      - laravel_backend
+
+  redis:
+    container_name: lv_reachable_redis
+    image: redis
+    ports:
+      - 16379:6379
+    volumes:
+      - ./data:/data
+
+  mariadb:
+    image: docker.io/bitnami/mariadb
+    container_name: lv_reachable_db
+    restart: unless-stopped
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - MARIADB_USER=$MARIADB_USER
+      - MARIADB_DATABASE=$MARIADB_DATABASE
+    networks:
+      - laravel_backend
+
+networks:
+  traefik:
+    external: true
+  laravel_backend:

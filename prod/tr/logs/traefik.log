@@ -1,0 +1,12 @@
+time="2022-12-11T18:12:14Z" level=error msg="Router defined multiple times with different configurations in [laravel-lv-e4d6ffbae06f460255ec74ba17d510ebad29acf575735de19424041e777f5f29 laravel-lv-reachable-d5cfd72c9788f50beb0e6bf19f87b72a2ae81481a4ffa1c635958190b479e2ee]" routerName=laravel-secure providerName=docker
+time="2022-12-11T18:12:14Z" level=error msg="Router defined multiple times with different configurations in [laravel-lv-e4d6ffbae06f460255ec74ba17d510ebad29acf575735de19424041e777f5f29 laravel-lv-reachable-d5cfd72c9788f50beb0e6bf19f87b72a2ae81481a4ffa1c635958190b479e2ee]" providerName=docker routerName=laravel
+time="2022-12-11T18:12:16Z" level=error msg="Router defined multiple times with different configurations in [laravel-lv-e4d6ffbae06f460255ec74ba17d510ebad29acf575735de19424041e777f5f29 laravel-lv-reachable-d5cfd72c9788f50beb0e6bf19f87b72a2ae81481a4ffa1c635958190b479e2ee]" providerName=docker routerName=laravel-secure
+time="2022-12-11T18:12:16Z" level=error msg="Router defined multiple times with different configurations in [laravel-lv-e4d6ffbae06f460255ec74ba17d510ebad29acf575735de19424041e777f5f29 laravel-lv-reachable-d5cfd72c9788f50beb0e6bf19f87b72a2ae81481a4ffa1c635958190b479e2ee]" providerName=docker routerName=laravel
+time="2022-12-11T19:17:10Z" level=error msg="http2: stream closed"
+time="2022-12-11T19:17:10Z" level=error msg="http2: stream closed"
+time="2022-12-11T19:17:10Z" level=error msg="http2: stream closed"
+time="2022-12-11T19:17:10Z" level=error msg="http2: stream closed"
+time="2022-12-11T19:17:11Z" level=error msg="client disconnected"
+time="2022-12-11T19:17:11Z" level=error msg="http2: stream closed"
+time="2022-12-11T19:17:11Z" level=error msg="http2: stream closed"
+time="2022-12-11T19:17:11Z" level=error msg="http2: stream closed"

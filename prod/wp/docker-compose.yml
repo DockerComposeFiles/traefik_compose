@@ -1,0 +1,89 @@
+networks:
+  # enable connection with Traefik
+  traefik:
+    external: true
+  # network for the app
+  backend:
+
+services:
+  wordpress:
+    build:
+      # call the Dockerfile
+      context: .
+    container_name: wp_app
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 10m
+        max-file: 3
+    environment:
+      # Connect WordPrerss to the database
+      # WORDPRESS_DB_HOST: wp_redis:6379
+      WORDPRESS_DB_HOST: wp_db:3306
+      WORDPRESS_DB_USER: $WORDPRESS_DB_USER
+      WORDPRESS_DB_PASSWORD: $WORDPRESS_DB_PASSWORD
+      WORDPRESS_DB_NAME: $WORDPRESS_DB_NAME
+    volumes:
+      # save the content of WordPress an enable local modifications
+      - ./data:/var/www/html
+    networks:
+      - traefik
+      - backend
+    depends_on:
+      - db
+      - redis
+    labels:
+      # The labels are usefull for Traefik only
+      - traefik.enable=true                                                   # ok
+      - traefik.docker.network=traefik                                        # ok
+      # Get the routes from http
+      - traefik.http.routers.wordpress.rule=Host(`$WORDPRESS_URL`)   # ok
+      - traefik.http.routers.wordpress.entrypoints=$ENTRYPOINT                       # ok
+      # Redirect these routes to https
+      # - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https  # unbekannt
+      # - traefik.http.routers.wordpress.middlewares=redirect-to-https@docker     # unbekannt
+      # Get the routes from https
+      - traefik.http.routers.wordpress-secure.rule=Host(`$WORDPRESS_URL`) # ok
+      - traefik.http.routers.wordpress-secure.entrypoints=$SECURE_ENTRYPOINT                    # ok
+      # Apply autentificiation with http challenge
+      - traefik.http.routers.wordpress-secure.tls=true                             # ok
+      - traefik.http.routers.wordpress-secure.tls.certresolver=$CERTRESOLVER         # ok
+      - traefik.http.routers.wordpress-secure.middlewares=secHeaders@file          # SSL A+
+
+  db:
+    # this is the database used by WordPress
+    image: mysql
+    container_name: wp_db
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 10m
+        max-file: 3
+    environment:
+      MYSQL_DATABASE: $WORDPRESS_DB_NAME
+      MYSQL_USER: $WORDPRESS_DB_USER
+      MYSQL_PASSWORD: $WORDPRESS_DB_PASSWORD
+      MYSQL_RANDOM_ROOT_PASSWORD: $WORDPRESS_DB_PASSWORD
+    volumes:
+      # Persist the database on disk
+      - ./db:/var/lib/mysql
+    networks:
+      - backend
+
+
+  redis:
+    image: redis:6
+    container_name: wp_redis
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+    # launch Redis in cache mode with :
+    #  - max memory up to 50% of your RAM if needed (--maxmemory 512mb)
+    #  - deleting oldest data when max memory is reached (--maxmemory-policy allkeys-lru)
+    entrypoint: redis-server # --maxmemory 512mb -maxmemory-policy -allkeys-lru
