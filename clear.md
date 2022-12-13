@@ -16,3 +16,7 @@ sudo systemctl daemon-reload
 sudo systemctl restart docker
 
 nano /etc/docker/daemon.json
+
+## config
+
+docker compose config
