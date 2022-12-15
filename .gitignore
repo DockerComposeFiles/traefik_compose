@@ -6,6 +6,7 @@ composer.phar
 # composer.lock
 
 .env
+.log
 db/
 app/
 src/
