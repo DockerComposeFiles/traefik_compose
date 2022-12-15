@@ -1,0 +1,15 @@
+FROM php:8.1.10-fpm-bullseye as supervisor
+RUN docker-php-ext-install pdo pdo_mysql
+
+## supervisor for queue woker
+RUN apt-get update && apt-get upgrade -y && apt-get install -y supervisor iputils-ping && apt-get clean
+
+# Make supervisor log directory
+RUN mkdir -p /var/log/supervisor
+
+# Copy local supervisord.conf to the conf.d directory
+
+COPY --chown=root:root supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Start supervisord
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]

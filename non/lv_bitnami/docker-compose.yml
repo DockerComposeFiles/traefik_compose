@@ -1,0 +1,35 @@
+services:
+  laravel:
+    image: bitnami/laravel
+    # build: .
+    container_name: lv_bitnami
+    restart: on-failure:1
+    ports:
+      - 81:8000
+    depends_on:
+      - mariadb
+    # environment:
+      # - DB_CONNECTION=mysql
+      # - DB_HOST=mariadb
+      # - DB_PORT=3306
+      # - DB_USERNAME=$MARIADB_USER
+      # - DB_DATABASE=$MARIADB_DATABASE
+      # - DB_PASSWORT=$MARIADB_PASSWORD
+    networks:
+      - laravel_backend
+
+  mariadb:
+    image: docker.io/bitnami/mariadb
+    container_name: lv_bitnami_db
+    restart: on-failure:1
+    environment:
+      - ALLOW_EMPTY_PASSWORD # is recommended only for development.
+      - MARIADB_USER=$MARIADB_USER
+      - MARIADB_DATABASE=$MARIADB_DATABASE
+      - MARIADB_PASSWORD=$MARIADB_PASSWORD
+      - MARIADB_ROOT_PASSWORD=$MARIADB_PASSWORD
+    networks:
+      - laravel_backend
+
+networks:
+  laravel_backend:
