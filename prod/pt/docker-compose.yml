@@ -13,7 +13,7 @@ services:
       - ./data:/data
     labels:
       - traefik.enable=true                                                            # activate Traefik
-      # - traefik.docker.network=traefik                                               # general network
+      - traefik.docker.network=traefik                                               # general network
       - traefik.http.routers.portainer.entrypoints=$ENTRYPOINT                        # 80 entrypoint as redirect
       - traefik.http.routers.portainer-secure.entrypoints=$SECURE_ENTRYPOINT                        # 443 entrypoint
       - traefik.http.routers.portainer-secure.service=portainer                        # service-name using by labels

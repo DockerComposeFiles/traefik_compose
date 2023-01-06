@@ -1,0 +1,74 @@
+services:
+  endlessh:
+    container_name: endlessh
+    image: shizunge/endlessh-go
+    restart: always
+    command:
+      - -interval_ms=1000
+      - -logtostderr
+      - -v=1
+      - -enable_prometheus
+      - -geoip_supplier=ip-api
+    networks:
+      - tarpit
+    ports:
+      # SSH port
+      # - 2222:2222
+      # Prometheus metrics port
+      - 127.0.0.1:2112:2112
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: always
+    command: 
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=45d
+      - --web.console.libraries=/usr/share/prometheus/console_libraries
+      - --web.console.templates=/usr/share/prometheus/consoles
+      - --web.enable-admin-api
+    networks:
+      - tarpit
+    ports:
+      - 127.0.0.1:9091:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus:/prometheus
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: always
+    networks:
+      - tarpit
+      - traefik
+    # ports:
+      # - 127.0.0.1:3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_USER=$ADMIN_USER
+      - GF_SECURITY_ADMIN_PASSWORD=$ADMIN_PASSWORD
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.tarpit.entrypoints=$ENTRYPOINT
+      - traefik.http.routers.tarpit-secure.entrypoints=$SECURE_ENTRYPOINT
+      - traefik.http.routers.tarpit-secure.service=tarpit
+      - traefik.http.routers.tarpit.rule=Host(`$URL`)
+      - traefik.http.routers.tarpit-secure.rule=Host(`$URL`)
+      - traefik.http.routers.tarpit-secure.tls=true
+      - traefik.http.routers.tarpit-secure.tls.certresolver=$CERTRESOLVER
+      - traefik.http.routers.tarpit-secure.middlewares=secHeaders@file
+      - traefik.http.services.tarpit.loadbalancer.server.port=3000
+    volumes:
+      - grafana_var:/var/lib/grafana/
+      - ./grafana-datasource.yml:/etc/grafana/provisioning/datasources/prometheus.yml
+
+networks:
+  tarpit:
+  traefik:
+    external: true
+
+
+volumes:
+  prometheus:
+  grafana_var:
