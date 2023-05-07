@@ -1,0 +1,57 @@
+services:
+  speedtest_tracker:
+    container_name: speedtest_tracker
+    image: "ghcr.io/alexjustesen/speedtest-tracker"
+    restart: unless-stopped
+    # ports:
+    # - '8080:80'
+    # - '8443:443'
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - DB_CONNECTION=mysql
+      - DB_HOST=st_db
+      - DB_PORT=3306
+      - DB_DATABASE=$DATABASE
+      - DB_USERNAME=speedy
+      - DB_PASSWORD=$PASSWORD
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.speedtest_tracker.entrypoints=$ENTRYPOINT
+      - traefik.http.routers.speedtest_tracker-secure.entrypoints=$SECURE_ENTRYPOINT
+      - traefik.http.routers.speedtest_tracker-secure.service=$SERVICE
+      - traefik.http.routers.speedtest_tracker.rule=Host(`$URL`)
+      - traefik.http.routers.speedtest_tracker-secure.rule=Host(`$URL`)
+      - traefik.http.routers.speedtest_tracker-secure.tls=true
+      - traefik.http.routers.speedtest_tracker-secure.tls.certresolver=$CERTRESOLVER
+      - traefik.http.routers.speedtest_tracker-secure.middlewares=secHeaders@file
+    networks:
+      - traefik
+      - st_backend
+    volumes:
+      - "./config:/config"
+    depends_on:
+      - st_db
+  st_db:
+    image: mariadb
+    container_name: speedtest_tracker_db
+    restart: always
+    environment:
+      - MYSQL_DATABASE=$DATABASE
+      - MYSQL_USER=speedy
+      - MYSQL_PASSWORD=$PASSWORD
+      - MYSQL_ROOT_PASSWORD=$ROOTPASSWORD
+      - MYSQL_INITDB_SKIP_TZINFO=1
+    volumes:
+      - ./db:/var/lib/mysql
+    networks:
+      - st_backend
+
+volumes:
+  speedtest-db:
+networks:
+  traefik:
+    external: true
+  st_backend:
+    driver: bridge

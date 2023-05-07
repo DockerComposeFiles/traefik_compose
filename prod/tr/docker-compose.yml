@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:latest
+    image: traefik
     container_name: tr  # Remove if using multiple instances
     restart: unless-stopped
     networks:

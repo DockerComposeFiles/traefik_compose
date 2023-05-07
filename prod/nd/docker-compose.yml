@@ -1,0 +1,28 @@
+services:
+  nocodb:
+    container_name: nd
+    image: nocodb/nocodb
+    restart: unless-stopped
+    volumes:
+      - ./data:/usr/app/data/
+    environment:
+      # - NC_DB="569a1821-0a93-45e8-87ab-eb857f20a010"
+      # - NC_DB="mysql2://host.docker.internal:3306?u=root&p=password&d=d1"
+    labels:
+      - traefik.enable=true                                                            # activate Traefik
+      - traefik.docker.network=traefik                                               # general network
+      - traefik.http.routers.noco.entrypoints=$ENTRYPOINT                        # 80 entrypoint as redirect
+      - traefik.http.routers.noco-secure.entrypoints=$SECURE_ENTRYPOINT                        # 443 entrypoint
+      - traefik.http.routers.noco-secure.service=noco                        # service-name using by labels
+      - traefik.http.routers.noco.rule=Host(`$URL`)                               # service-domain for 80
+      - traefik.http.routers.noco-secure.rule=Host(`$URL`)                         # service-domain for 443
+      # - traefik.http.middlewares.noco-https-redirect.redirectscheme.scheme=https # http->https middleware
+      # - traefik.http.routers.noco.middlewares=noco-https-redirect           # http->https middleware
+      - traefik.http.routers.noco-secure.tls=true                                 # certificate=tls
+      - traefik.http.routers.noco-secure.tls.certresolver=$CERTRESOLVER           # certresolver=lets-encrypt
+      - traefik.http.routers.noco-secure.middlewares=secHeaders@file              # A++ security, provider:file
+      - traefik.http.services.noco.loadbalancer.server.port=8080                  # default port
+
+networks:
+  traefik:
+    external: true

@@ -1,0 +1,29 @@
+services:
+  speedtest_tracker:
+    container_name: speedtest_tracker
+    image: ghcr.io/alexjustesen/speedtest-tracker
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+    networks:
+      - traefik
+    volumes:
+      - "./config:/config"
+    labels:
+      - traefik.enable=true
+      # - traefik.docker.network=traefik
+
+      - traefik.http.routers.speedtest_tracker.rule=Host(`$URL`)
+      - traefik.http.routers.speedtest_tracker.entrypoints=$ENTRYPOINT
+      - traefik.http.routers.speedtest_tracker-secure.rule=Host(`$URL`)
+      - traefik.http.routers.speedtest_tracker-secure.entrypoints=$SECURE_ENTRYPOINT
+      # - traefik.http.routers.speedtest_tracker-secure.service=$SERVICE
+
+      - traefik.http.routers.speedtest_tracker-secure.tls=true
+      - traefik.http.routers.speedtest_tracker-secure.tls.certresolver=$CERTRESOLVER
+      - traefik.http.routers.speedtest_tracker-secure.middlewares=secHeaders@file
+      - traefik.http.services.speedtest_tracker.loadbalancer.server.port=443
+networks:
+  traefik:
+    external: true
