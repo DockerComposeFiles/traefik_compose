@@ -21,3 +21,9 @@ shell.sh
 *.log
 3_st_sq/
 
+# generische Daten
+default.md
+
+# Sicherheit
+*.key
+
