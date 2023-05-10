@@ -88,6 +88,7 @@ find . -type f -iname "readme.md" | while read file; do
 done
 
 ./perm.sh
+./build.sh
 ./clear.sh
 
 # Zählen der Anzahl der README.md-Dateien

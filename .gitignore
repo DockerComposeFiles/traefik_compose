@@ -7,7 +7,6 @@ www/
 # composer.lock
 
 .env
-.log
 db/
 app/
 src/
@@ -23,6 +22,7 @@ shell.sh
 
 # generische Daten
 default.md
+default.yml
 
 # Sicherheit
 *.key
