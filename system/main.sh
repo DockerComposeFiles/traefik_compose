@@ -90,8 +90,5 @@ done
 ./perm.sh
 ./build.sh
 ./clear.sh
-
-# Zählen der Anzahl der README.md-Dateien
-count=$(find . -type f -iname "readme.md" | wc -l)
-echo "Readme's:" $count
+./doc.sh
 

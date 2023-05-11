@@ -2,7 +2,7 @@
 
 files=$(find . -type f -name "*.log")
 if [[ -z "$files" ]]; then
-  echo "Keine .log-Dateien gefunden."
+  # Keine Log Dateien vorhanden
   exit 1
 fi
 

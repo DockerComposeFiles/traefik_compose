@@ -17,6 +17,12 @@ function generateDefault() {
   # Parameter aus Datei lesen
   declare -A PARAMS
   while IFS='=' read -r key value; do
+    if [[ "${key@Q}" != "$key" ]]; then
+      # echo "Ungültiger Schlüsselname: $key"
+      continue
+    # else
+    fi
+    line=${line//$key/${PARAMS[$key]}}
     PARAMS["$key"]=$(trim "$value")
   done <"$PARAM_FILE"
 
@@ -54,7 +60,6 @@ function generateDefault() {
     done
     echo "$line" >>"$TARGET_FILE"
   done <"$SOURCE_FILE"
-
 }
 
 # Durchsuchen aller Unterverzeichnisse und Aufrufen der Funktion für jedes Verzeichnis
