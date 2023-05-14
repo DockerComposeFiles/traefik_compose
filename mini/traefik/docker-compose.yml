@@ -1,0 +1,26 @@
+services:
+  traefik:
+    image: traefik
+    container_name: traefik
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.traefik-https.rule=Host(`$URL`)                        # Hauptdomain
+      - traefik.http.routers.traefik-https.entrypoints=$SECURE_ENTRYPOINT                        # Dienste: Entrypoint vergabe
+      - traefik.http.routers.traefik-https.tls=true                                 # Dienste: Zertifikatsweitergabe
+      - traefik.http.routers.traefik-https.service=api@internal
+      - traefik.http.routers.traefik-https.tls.certresolver=$CERTRESOLVER
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./config/traefik.yml:/traefik.yml
+      - ./config/ACME:/ACME
+      - ./config/dynamic.yml:/dynamic.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - ./logs/:/var/logs
+networks:
+  traefik:
+    external: true
