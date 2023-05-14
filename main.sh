@@ -1,8 +1,13 @@
 #!/bin/bash
 
+./perm.sh
+
+#Setze das aktuelle Arbeitsprogramm
+cd ./mini
+
 # Setze den Pfad zur Haupt env-Datei (default: ./env)
 env_file=".env"
-
+echo $env_file
 # Sortieren der Schlüssel-Wert-Paare alphabetisch
 sort_env=$(sort "$env_file")
 
@@ -38,6 +43,15 @@ for dir in */; do
     echo "Erstelle .env-Datei in Ordner $dir"
     cp "$env_file" "$subdir"
 
+    # Zusammenstellung des Standard Url Namens
+    dir_name=$(basename "$dir")
+    new_url="${dir_name}.${URL}"
+
+    oldUrl=$(grep "^URL=" "${dir_name}/.env" | cut -d "=" -f 2)
+    if [ ${new_url} != ${oldUrl} ]; then
+      sed -i "s#^URL=.*#URL=${new_url}#" "$subdir"
+      echo ${oldUrl} " updated to " ${new_url}
+    fi
   fi
 
   # Überprüfe, ob das URL-Feld in der .env-Datei definiert ist und setze es, wenn es fehlt
@@ -56,15 +70,6 @@ for dir in */; do
     fi
   done <"$env_file"
 
-  # Aktualisiere das URL-Feld in der .env-Datei im Unterordner
-  dir_name=$(basename "$dir")
-  new_url="${dir_name}.${URL}"
-
-  oldUrl=$(grep "^URL=" "${dir_name}/.env" | cut -d "=" -f 2)
-  if [ ${new_url} != ${oldUrl} ]; then
-    sed -i "s#^URL=.*#URL=${new_url}#" "$subdir"
-    echo ${oldUrl} " updated to " ${new_url}
-  fi
 done
 
 # README
@@ -87,8 +92,6 @@ find . -type f -iname "readme.md" | while read file; do
   fi
 done
 
-./perm.sh
-./build.sh
-./clear.sh
-./doc.sh
-
+./../build.sh
+./../clear.sh
+./../doc.sh
