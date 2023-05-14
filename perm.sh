@@ -47,7 +47,7 @@ function file_permissions() {
 
 files=("docker-compose.yml" "Dockerfile")
 file_permissions "644" "${files[@]}"
-files=("acme.json")
+files=("acme.json" "*.env")
 file_permissions "600" "${files[@]}"
 files=("*.sh")
 file_permissions "755" "${files[@]}"
