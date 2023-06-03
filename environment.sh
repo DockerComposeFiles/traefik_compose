@@ -1,6 +1,7 @@
 # Setze den Pfad zur Haupt env-Datei (default: ./env)
 env_file=".env"
-echo $env_file
+# echo $env_file
+
 # Sortieren der Schlüssel-Wert-Paare alphabetisch
 sort_env=$(sort "$env_file")
 
@@ -30,6 +31,14 @@ for dir in */; do
   # Konstruiere den Pfad zur env-Datei im Unterordner
   subdir="$dir${env_file##*/}"
   env_subdir="${subdir%.*}"
+  
+  # Temporäre Datei erstellen
+  tempfile=$(mktemp)
+  # Leerzeilen entfernen
+  grep -v '^$' "$env_file" > "$tempfile"
+
+  # Ursprüngliche Datei durch die bereinigte Datei ersetzen
+  mv "$tempfile" "$env_file"
 
   # Überprüfe, ob die .env-Datei existiert, wenn nicht, erstelle sie und kopiere alle Einträge aus der Hauptdatei
   if [[ ! -r "$subdir" ]]; then
@@ -55,7 +64,8 @@ for dir in */; do
 
   # Kopiere alle anderen Einträge aus der Hauptdatei in die .env-Datei im Unterordner
   while IFS= read -r line; do
-    if [[ $line == "URL="* ]]; then
+    if [[ $line == "URL="* || -z $line || $line == "" ]]; then
+      # echo " Übersprungen $line"
       continue
     fi
     if ! grep -q "^${line%=*}=" "$subdir"; then

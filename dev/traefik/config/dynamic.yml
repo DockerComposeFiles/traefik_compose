@@ -42,12 +42,12 @@ http:
 #       tls:
 #         certresolver: default
 
-services:
+# services:
 #    service-1: # Ich verwende hier den gleiche Namen wie bei routers
 #      loadBalancer:
 #        servers:
 #          - url: "http://127.0.0.1" # Auf die richtige URL anpassen.
-     bookstack-secure:
-      loadBalancer:
-        servers:
-          - url "http://172.20.0.3:80"
+    #  bookstack-secure:
+      # loadBalancer:
+        # servers:
+          # - url "http://172.20.0.3:80"

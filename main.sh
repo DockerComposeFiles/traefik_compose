@@ -21,6 +21,6 @@ fi
 echo "Umgebung: $(pwd)"
 
 ./../environment.sh
-./../default.sh
+# ./../default.sh
 ./../clear.sh
 ./../doc.sh
