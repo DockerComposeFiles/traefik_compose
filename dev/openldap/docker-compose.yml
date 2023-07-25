@@ -1,0 +1,23 @@
+services:
+  ldap-server:
+    image: osixia/openldap
+    container_name: ldap-server
+    environment:
+      - LDAP_ORGANISATION=Your Organization
+      - LDAP_DOMAIN=yourdomain.com
+      - LDAP_ADMIN_PASSWORD=admin_password
+    ports:
+      - '389:389'
+      - '636:636'
+    volumes:
+      - ldap-data:/var/lib/ldap
+      - ldap-config:/etc/ldap/slapd.d
+    networks:
+      - ldap-network
+
+volumes:
+  ldap-data:
+  ldap-config:
+
+networks:
+  ldap-network:
