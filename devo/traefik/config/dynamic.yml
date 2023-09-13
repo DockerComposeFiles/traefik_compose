@@ -16,6 +16,23 @@ tls:
     mintls13:
       minVersion: VersionTLS13
 
+##alt
+# http:
+#   middlewares:
+#     secHeaders:
+#       headers:
+#         browserXssFilter: true
+#         contentTypeNosniff: true
+#         frameDeny: true
+#         sslRedirect: true
+#         #  HSTS Configuration
+#         stsIncludeSubdomains: true
+#         stsPreload: true
+#         stsSeconds: 31536000
+#         customRequestHeaders:
+#           X-Frame-Options: "SAMEORIGIN"
+#         customFrameOptionsValue: "SAMEORIGIN"
+##neu
 http:
   middlewares:
     secHeaders:
@@ -23,15 +40,16 @@ http:
         browserXssFilter: true
         contentTypeNosniff: true
         frameDeny: true
-        sslRedirect: true
-        #  HSTS Configuration
         stsIncludeSubdomains: true
         stsPreload: true
         stsSeconds: 31536000
         customRequestHeaders:
           X-Frame-Options: "SAMEORIGIN"
         customFrameOptionsValue: "SAMEORIGIN"
-
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
 #  Beispiel für externe Dienste
 #   routers:
 #     router-1: # Tausche den Namen gegen etwas sprechendes aus
@@ -47,7 +65,7 @@ http:
 #      loadBalancer:
 #        servers:
 #          - url: "http://127.0.0.1" # Auf die richtige URL anpassen.
-    #  bookstack-secure:
-      # loadBalancer:
-        # servers:
-          # - url "http://172.20.0.3:80"
+#  bookstack-secure:
+# loadBalancer:
+# servers:
+# - url "http://172.20.0.3:80"
